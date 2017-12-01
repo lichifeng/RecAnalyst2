@@ -100,7 +100,7 @@ class ChatMessage
         if (is_null($player)) {
             $player = new Player();
             $player->name = substr($chat, 0, strpos($chat, ': '));
-            if ($player->name[0] === ' ') {
+            if (isset($player->name[0]) && $player->name[0] === ' ') {
                 $player->name = substr($player->name, 1);
             }
         }
