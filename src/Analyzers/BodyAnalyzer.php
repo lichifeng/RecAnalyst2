@@ -321,7 +321,8 @@ class BodyAnalyzer extends Analyzer
                         $resourceId = ord($this->body[$this->position++]);
 
                         $playerFrom = $playersByIndex[$playerIdFrom];
-                        $playerTo = $playersByIndex[$playerIdTo];
+                        //Bug. See 游戏录象 -  02-七月-2014 21`53`00 from 飞云
+                        $playerTo = isset($playersByIndex[$playerIdTo]) ? $playersByIndex[$playerIdTo] : 0;
 
                         if ($playerFrom && $playerTo) {
                             $amount = $this->readBody('f', 4);
