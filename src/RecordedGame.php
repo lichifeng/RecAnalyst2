@@ -50,6 +50,8 @@ class RecordedGame
      */
     public $file;
 
+
+
     /**
      * Create a recorded game analyser.
      *
@@ -267,9 +269,13 @@ class RecordedGame
      */
     public function players()
     {
-        return array_filter($this->header()->players, function ($player) {
+        if (isset($this->players)) {
+            return $this->players;
+        }
+        $this->players =  array_filter($this->header()->players, function ($player) {
             return !$player->isSpectator();
         });
+        return $this->players;
     }
 
     /**
@@ -324,6 +330,35 @@ class RecordedGame
     {
         $proc = new Achievements($this, $options);
         return $proc->run();
+    }
+
+    /**
+     * Generate research table
+     *
+     * @return array
+     */
+    public function researchTable() {
+        $researches = [];
+        foreach ($this->players as $player) {
+            $researches[$player->index] = [];
+        }
+        $researchesByMinute = [];
+        foreach ($this->players as $player) {
+            foreach ($player->researches() as $research) {
+                $minute = floor($research->time / 1000 / 60);
+                $researchesByMinute[$minute][$player->index][] = [$research->id, $research->name()];
+            }
+        }
+        foreach ($researchesByMinute as $minute => $researchesByPlayer) {
+            foreach ($this->players as $player) {
+                $researches[$player->index][$minute] =
+                    $researchesByPlayer[$player->index] ?? [];
+            }
+        }
+        foreach ($researches as &$timeline) {
+            ksort($timeline, SORT_NUMERIC);
+        }
+        return $researches;
     }
 
     /**
