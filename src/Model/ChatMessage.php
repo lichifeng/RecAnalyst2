@@ -104,11 +104,11 @@ class ChatMessage
             // ...adds a space character before the name, so we deal with it
             // separately.
             if (substr($chat, 0, 9) === '<Rating> ') {
-                $group = 'Rating';
+                $group = '<Rating>';
                 $chat = substr($chat, 9);
             } else {
                 $end = strpos($chat, '>');
-                $group = substr($chat, 1, $end - 1);
+                $group = substr($chat, 0, $end);
                 $chat = substr($chat, $end + 1);
             }
         }
