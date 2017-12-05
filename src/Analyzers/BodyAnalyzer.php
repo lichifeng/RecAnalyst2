@@ -238,7 +238,7 @@ class BodyAnalyzer extends Analyzer
                         $player = $playersByIndex[$playerIndex];
                         if ($player && $player->resignTime === 0) {
                             $player->resignTime = $this->currentTime;
-                            $message = sprintf('%s resigned', $player->name);
+                            $message = sprintf('%s 投降', $player->name);
                             $this->chatMessages[] = new ChatMessage($this->currentTime, null, $message);
                         }
                         break;

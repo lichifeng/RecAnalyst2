@@ -46,28 +46,22 @@ class RecordedGame
     private $options = [];
 
     /**
+     * Record file
+     */
+    private $file;
+
+    /**
      * Create a recorded game analyser.
      *
-     * @param  resource|string|\SplFileInfo  $filename  Path or handle to the recorded game file.
+     * @param  resource|string|\SplFileInfo| Illuminate\Http\Request  $file_source  Path or handle to the recorded game file.
      * @param  array  $options
      * @return void
      */
-    public function __construct($filename = null, array $options = [])
+    public function __construct($file_source = null, array $options = [])
     {
-        // Set the file name and file pointer/handle/resource. (pick your
-        // favourite name…!)
-        if (is_resource($filename)) {
-            $this->fp = $filename;
-            $this->filename = '';
-        } else if (is_object($filename) && is_a($filename, 'SplFileInfo')) {
-            $this->filename = $filename->getRealPath();
-        } else {
-            $this->filename = $filename;
-        }
+        $this->retrieve_file($file_source);
 
-        if (!$this->fp) {
-            $this->open();
-        }
+        $this->open_file();
 
         // Remember if we're in a Laravel environment.
         $this->isLaravel = function_exists('app') && is_a(app(), 'Illuminate\Foundation\Application');
@@ -95,13 +89,37 @@ class RecordedGame
     }
 
     /**
+     * Take game file from file source
+     * If a Laravel request is passed, only the first file in a request will be taken out
+     *
+     * @param $file_source
+     */
+    private function retrieve_file($file_source) {
+        // Set the file name and file pointer/handle/resource. (pick your
+        // favourite name…!)
+        if (is_resource($file_source)) {
+            $this->fp = $file_source;
+            $this->file = '';
+        } else if (is_object($file_source) && is_a($file_source, 'SplFileInfo')) {
+            $this->file = $file_source->getRealPath();
+        } else if (is_object($file_source) && is_a($file_source, 'Illuminate\Http\Request')) {
+            // Take the first file found in a Laravel request
+            $file_input = $file_source->file();
+            $file_input = reset($file_input);
+            $this->file = is_array($file_input) ? $file_input[0] : $file_input;
+        } else {
+            $this->file = $file_source;
+        }
+    }
+    
+    /**
      * Create a file handle for the recorded game file.
      *
      * @return void
      */
-    private function open()
+    private function open_file()
     {
-        $this->fp = fopen($this->filename, 'r');
+        $this->fp = $this->fp ? $this->fp : fopen($this->file, 'r');
     }
 
     /**
