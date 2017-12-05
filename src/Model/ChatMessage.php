@@ -21,13 +21,9 @@ class ChatMessage
     /**
      * Player who sent this message.
      *
-     * This might be a player that is not actually in the game, if they joined
-     * the lobby but left before the game started. In that case the Player
-     * object will be empty except for `$name`.
-     *
-     * @var \RecAnalyst\Model\Player
+     * @var $name
      */
-    public $player;
+    public $player_name;
 
     /**
      * Message text.
@@ -48,17 +44,17 @@ class ChatMessage
      *
      * @param int  $time  When this message was sent, in milliseconds since the
      *     start of the game.
-     * @param \RecAnalyst\Model\Player  $player  Player that sent the message.
+     * @param string  $name  Player that sent the message.
      * @param string  $msg  Message content.
      * @param string  $group  Group this message was directed to.
      * @return void
      */
-    public function __construct($time = 0, Player $player = null, $msg = '', $group = '')
+    public function __construct($time = 0, $name = '', $msg = '', $group = '')
     {
         $this->time = $time;
-        $this->player = $player;
+        $this->player_name = Utils::stringToUTF8($name);
         $this->msg = Utils::stringToUTF8($msg);
-        $this->group = $group;
+        $this->group = Utils::stringToUTF8($group);
     }
 
     /**
@@ -69,7 +65,7 @@ class ChatMessage
     public function toArray() {
         return [
             Utils::formatGameTime($this->time),
-            $this->player ? $this->player->name : null,
+            $this->player_name,
             $this->msg,
             $this->group
         ];
@@ -86,11 +82,10 @@ class ChatMessage
      *
      * @param int  $time  Time at which this message was sent in milliseconds
      *    since the start of the game.
-     * @param \RecAnalyst\Model\Player  $player  Message Sender.
      * @param string  $chat  Message contents.
      * @return ChatMessage
      */
-    public static function create($time, $player, $chat)
+    public static function create($time, $chat)
     {
         $group = '';
         // This is directed someplace (@All, @Team, @Enemy, etc.)
@@ -108,19 +103,15 @@ class ChatMessage
                 $chat = substr($chat, 9);
             } else {
                 $end = strpos($chat, '>');
-                $group = substr($chat, 0, $end);
+                $group = substr($chat, 0, $end + 1);
                 $chat = substr($chat, $end + 1);
             }
         }
-        if (is_null($player)) {
-            $player = new Player();
-            $player->name = substr($chat, 0, strpos($chat, ': '));
-            if (isset($player->name[0]) && $player->name[0] === ' ') {
-                $player->name = substr($player->name, 1);
-            }
-        }
+
+        $name = substr($chat, 0, strpos($chat, ':'));
+        $name = ltrim($name);
         // Cut the player name out of the message contents.
-        $chat = substr($chat, strlen($player->name) + 2);
-        return new self($time, $player, $chat, $group);
+        $chat = ltrim(substr($chat, strlen($name) + 2));
+        return new self($time, $name, $chat, $group);
     }
 }

@@ -177,8 +177,6 @@ class BodyAnalyzer extends Analyzer
 
         $players = $this->get(PlayerMetaAnalyzer::class);
 
-        // The player number is used for chat messages.
-        $playersByNumber = [];
         // The player index is used for game actions.
         $playersByIndex = [];
         foreach ($players as $player) {
@@ -239,8 +237,8 @@ class BodyAnalyzer extends Analyzer
                         $player = $playersByIndex[$playerIndex];
                         if ($player && $player->resignTime === 0) {
                             $player->resignTime = $this->currentTime;
-                            $message = sprintf(mb_convert_encoding('%s 投降!', 'gbk', 'UTF-8'), $player->name);
-                            $this->chatMessages[] = new ChatMessage($this->currentTime, null, $message);
+                            $message = mb_convert_encoding(sprintf('%s 投降!', $player->name), 'gbk', 'UTF-8');
+                            $this->chatMessages[] = new ChatMessage($this->currentTime, $message);
                         }
                         break;
                     // researches
@@ -406,17 +404,9 @@ class BodyAnalyzer extends Analyzer
             if (substr($chat, 3, 2) == '--' && substr($chat, -2) == '--') {
                 // Skip messages like "--Warning: You are under attack... --"
                 return;
-            } else if (!empty($this->playersByNumber[$chat[2]])) {
-                $player = $this->playersByNumber[$chat[2]];
-            } else {
-                // Shouldn't happen, but we'll let the ChatMessage factory
-                // create a fake player for this message.
-                // TODO that auto-create behaviour is probably not desirable…
-                $player = null;
             }
             $this->chatMessages[] = ChatMessage::create(
                 $this->currentTime,
-                $player,
                 substr($chat, 3)
             );
         }
