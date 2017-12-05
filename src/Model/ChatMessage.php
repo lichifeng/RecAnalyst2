@@ -68,7 +68,7 @@ class ChatMessage
      */
     public function toArray() {
         return [
-            $this->time,
+            Utils::formatGameTime($this->time),
             $this->player ? $this->player->name : null,
             $this->msg,
             $this->group
