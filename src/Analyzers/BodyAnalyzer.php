@@ -7,6 +7,7 @@ use RecAnalyst\RecordedGame;
 use RecAnalyst\Model\Tribute;
 use RecAnalyst\Model\ChatMessage;
 use RecAnalyst\ResourcePacks\AgeOfEmpires\Civilization;
+use RecAnalyst\Utils;
 
 /**
  * Analyzer for most things in a recorded game file body.
@@ -365,7 +366,7 @@ class BodyAnalyzer extends Analyzer
         $analysis = new \StdClass;
         $analysis->duration = $this->currentTime;
         $analysis->tributes = $this->tributes;
-        $analysis->chatMessages = $this->chatMessages;
+        $analysis->chatMessages = Utils::msgToArray($this->chatMessages);
         $analysis->units = $this->units;
         $analysis->buildings = $this->buildings;
         $analysis->postGameData = $this->postGameData;

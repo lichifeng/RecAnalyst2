@@ -38,9 +38,9 @@ class BodyAnalyzerTest extends TestCase
         $rec = new RecordedGame(Path::join(__DIR__, 'recs/versions/up1.4.mgz'));
         $messages = $rec->runAnalyzer(new BodyAnalyzer)->chatMessages;
         // Rating messages should belong to a player.
-        $this->assertEquals($messages[0]->group, 'Rating');
-        $this->assertEquals($messages[0]->msg, '2212');
-        $this->assertEquals($messages[0]->player->name, 'Zuppi');
+        $this->assertEquals($messages[0][3], '<Rating>');
+        $this->assertEquals($messages[0][2], '2212');
+        $this->assertEquals($messages[0][1], 'Zuppi');
     }
 
     /**
@@ -71,9 +71,9 @@ class BodyAnalyzerTest extends TestCase
 
         // All these players are co-oping, so they share a player index.
         // They can all chat separately, though.
-        $this->assertAttributeEquals('yousifr', 'name', $messages[0]->player);
-        $this->assertAttributeEquals('TheBlackWinds', 'name', $messages[3]->player);
-        $this->assertAttributeEquals('Mobius One', 'name', $messages[4]->player);
+        $this->assertEquals($messages[0][1], 'yousifr');
+        $this->assertEquals($messages[3][1], 'TheBlackWinds');
+        $this->assertEquals($messages[4][1], 'Mobius One');
     }
 
     public function recordsProvider()

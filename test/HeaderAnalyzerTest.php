@@ -134,12 +134,12 @@ class HeaderAnalyzerTest extends TestCase
         for ($i = 2; $i < 5; $i += 1) {
             $this->assertStringMatchesFormat(
                 'Performance warning: There is moderate latency between %s and %s. This will hinder the speed of the match.',
-                $analysis->pregameChat[$l - $i]->msg
+                $analysis->pregameChat[$l - $i][2]
             );
         }
 
-        $this->assertAttributeEquals('hf gl', 'msg', $analysis->pregameChat[$l - 1]);
-        $this->assertAttributeEquals('gl hf', 'msg', $analysis->pregameChat[$l]);
+        $this->assertEquals($analysis->pregameChat[$l - 1][2], 'hf gl');
+        $this->assertEquals($analysis->pregameChat[$l][2], 'gl hf');
     }
 
     public function testCoops()

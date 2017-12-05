@@ -38,4 +38,18 @@ class Utils
         $utf8_str = mb_convert_encoding($str, "UTF-8", $raw_encoding);
         return $utf8_str;
     }
+
+    /**
+     * Convert chat message to array
+     *
+     * @param $rawMsg
+     * @return array
+     */
+    public static function msgToArray($rawMsg) {
+        $msgArray = [];
+        foreach ($rawMsg as  $msg) {
+            $msgArray[] = $msg->toArray();
+        }
+        return $msgArray;
+    }
 }

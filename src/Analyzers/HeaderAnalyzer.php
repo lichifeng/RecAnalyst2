@@ -242,7 +242,7 @@ class HeaderAnalyzer extends Analyzer
         $gameInfo = new GameInfo($this->rec);
 
         $analysis->mapData = $mapData->terrain;
-        $analysis->pregameChat = $pregameChat;
+        $analysis->pregameChat = Utils::msgToArray($pregameChat);
         $analysis->gameSettings = new GameSettings($this->rec, $gameSettings);
         $analysis->gameInfo = $gameInfo;
         $analysis->playerInfo = $playerInfo;
