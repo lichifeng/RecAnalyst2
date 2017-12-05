@@ -339,18 +339,18 @@ class RecordedGame
      */
     public function researchTable() {
         $researches = [];
-        foreach ($this->players as $player) {
+        foreach ($this->players() as $player) {
             $researches[$player->index] = [];
         }
         $researchesByMinute = [];
-        foreach ($this->players as $player) {
+        foreach ($this->players() as $player) {
             foreach ($player->researches() as $research) {
                 $minute = floor($research->time / 1000 / 60);
                 $researchesByMinute[$minute][$player->index][] = [$research->id, $research->name()];
             }
         }
         foreach ($researchesByMinute as $minute => $researchesByPlayer) {
-            foreach ($this->players as $player) {
+            foreach ($this->players() as $player) {
                 $researches[$player->index][$minute] =
                     $researchesByPlayer[$player->index] ?? [];
             }
