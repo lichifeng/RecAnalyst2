@@ -55,17 +55,28 @@ class GameInfo
     {
         $teams = $this->rec->teams();
 
-        $teamMembers = array_map($teams, function (&$team) {
-            // Count non-cooping players.
-            return array_reduce($team->players(), function ($count, &$player) {
-                return $player->isCooping ? $count : $count + 1;
-            }, 0);
-        });
-
+        $teamMembers = [];
+        foreach($teams as $team) {
+            $coopingCount = [];
+            if ( !($team->index() === 0 && isset($teamMembers[$team->index()]) ) )
+                $teamMembers[$team->index()] = 0;
+            foreach($team->players() as $player) {
+                if ( $player->isCooping() ) {
+                    if ( !isset($coopingCount[$player->index]) ) {
+                        $coopingCount[$player->index] = true;
+                        $teamMembers[$team->index()]++;
+                    }
+                } else {
+                    $teamMembers[$team->index()]++;
+                }
+            }
+        }
         // Remove teams without players.
         $teamMembers = array_diff($teamMembers, [0]);
         if (array_sum($teamMembers) === count($teams) && count($teams) > 2) {
-            return 'FFA';
+            return '混战';
+        } elseif(count($teams) === 2 && array_sum($teamMembers) === 2){
+            return '1v1';
         } else {
             return implode('v', $teamMembers);
         }
