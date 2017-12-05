@@ -3,6 +3,7 @@
 namespace RecAnalyst\Analyzers;
 
 use RecAnalyst\Model\Player;
+use RecAnalyst\Utils;
 
 /**
  * Analyze the small player metadata block. Can be composed or run
@@ -66,7 +67,7 @@ class PlayerMetaAnalyzer extends Analyzer
         $human = $this->readHeader('l', 4);
         $length = $this->readHeader('L', 4);
         if ($length) {
-            $player->name = $this->readHeaderRaw($length);
+            $player->name = Utils::stringToUTF8($this->readHeaderRaw($length));
         } else {
             $player->name = '';
         }

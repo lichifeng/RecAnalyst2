@@ -287,7 +287,13 @@ class HeaderAnalyzer extends Analyzer
             // colour)
             if ($chat[0] == '@' && $chat[1] == '#' && $chat[2] >= '1' && $chat[2] <= '8') {
                 $chat = rtrim($chat); // throw null-termination character
-                $messages[] = ChatMessage::create(null, null, substr($chat, 3));
+                if (!empty($playersByNumber[$chat[2]])) {
+                    $player = $playersByNumber[$chat[2]];
+                } else {
+                    // this player left before the game started
+                    $player = null;
+                }
+                $messages[] = ChatMessage::create(null, $player, substr($chat, 3));
             }
         }
         return $messages;

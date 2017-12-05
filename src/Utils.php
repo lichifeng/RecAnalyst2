@@ -10,8 +10,8 @@ class Utils
     /**
      * Format a game time as "HH:MM:SS".
      *
-     * @param int  $time  Game time in milliseconds.
-     * @param string  $format  sprintf-style format.
+     * @param int $time Game time in milliseconds.
+     * @param string $format sprintf-style format.
      *     Defaults to %02d:%02d:%02d, for HH:MM:SS.
      * @return string Formatted string, or "-" if the time is 0. (Zero usually
      *     means "did not occur" or "unknown" in recorded game timestamps.)
@@ -21,9 +21,21 @@ class Utils
         if ($time == 0) {
             return '-';
         }
-        $hour   =  (int)($time / 1000 / 3600);
+        $hour = (int)($time / 1000 / 3600);
         $minute = ((int)($time / 1000 / 60)) % 60;
         $second = ((int)($time / 1000)) % 60;
         return sprintf($format, $hour, $minute, $second);
+    }
+
+    /**
+     * Convert strings in record to UTF-8 encoded
+     *
+     * @param $str
+     * @return string
+     */
+    public static function stringToUTF8($str, $raw_encoding = 'gbk')
+    {
+        $utf8_str = mb_convert_encoding($str, "UTF-8", $raw_encoding);
+        return $utf8_str;
     }
 }

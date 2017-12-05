@@ -48,7 +48,7 @@ class RecordedGame
     /**
      * Record file
      */
-    private $file;
+    public $file;
 
     /**
      * Create a recorded game analyser.
@@ -59,9 +59,9 @@ class RecordedGame
      */
     public function __construct($file_source = null, array $options = [])
     {
-        $this->retrieve_file($file_source);
+        $this->retrieveFile($file_source);
 
-        $this->open_file();
+        $this->openFile();
 
         // Remember if we're in a Laravel environment.
         $this->isLaravel = function_exists('app') && is_a(app(), 'Illuminate\Foundation\Application');
@@ -94,7 +94,7 @@ class RecordedGame
      *
      * @param $file_source
      */
-    private function retrieve_file($file_source) {
+    private function retrieveFile($file_source) {
         // Set the file name and file pointer/handle/resource. (pick your
         // favourite name…!)
         if (is_resource($file_source)) {
@@ -117,7 +117,7 @@ class RecordedGame
      *
      * @return void
      */
-    private function open_file()
+    private function openFile()
     {
         $this->fp = $this->fp ? $this->fp : fopen($this->file, 'r');
     }

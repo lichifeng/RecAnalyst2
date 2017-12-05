@@ -3,6 +3,7 @@
 namespace RecAnalyst\Model;
 
 use RecAnalyst\Model\Player;
+use RecAnalyst\Utils;
 
 /**
  * The ChatMessage class represents a single chat message sent before or during
@@ -56,8 +57,22 @@ class ChatMessage
     {
         $this->time = $time;
         $this->player = $player;
-        $this->msg = $msg;
+        $this->msg = Utils::stringToUTF8($msg);
         $this->group = $group;
+    }
+
+    /**
+     * Return an array representation of a chat message
+     *
+     * @return array
+     */
+    public function toArray() {
+        return [
+            $this->time,
+            $this->player ? $this->player->name : null,
+            $this->msg,
+            $this->group
+        ];
     }
 
     /**
