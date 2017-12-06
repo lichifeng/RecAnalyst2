@@ -69,8 +69,8 @@ class Tribute
     public function toArray() {
         return [
             $this->time,
-            [$this->playerFrom->name, $this->playerFrom->color()],
-            [$this->playerTo->name, $this->playerTo->color()],
+            $this->playerFrom->name,
+            $this->playerTo->name,
             $this->resourceId,
             $this->fee
         ];
