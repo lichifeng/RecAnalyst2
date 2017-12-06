@@ -253,12 +253,12 @@ class GameSettings
     {
         $resourcePack = $this->rec->getResourcePack();
         if ($resourcePack->isCustomMap($this->mapId)) {
-            return GameSettings::MAPSTYLE_CUSTOM;
+            return $this->rec->trans('map_styles', GameSettings::MAPSTYLE_CUSTOM);
         } else if ($resourcePack->isRealWorldMap($this->mapId)) {
-            return GameSettings::MAPSTYLE_REALWORLD;
+            return $this->rec->trans('map_styles', GameSettings::MAPSTYLE_REALWORLD);
         }
         // TODO add case for the "Special" maps in the HD expansion packs
-        return GameSettings::MAPSTYLE_STANDARD;
+        return $this->rec->trans('map_styles', GameSettings::MAPSTYLE_STANDARD);
     }
 
     /**
