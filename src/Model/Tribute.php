@@ -65,4 +65,14 @@ class Tribute
         $this->resourceId = self::FOOD;
         $this->fee = 0.0;
     }
+
+    public function toArray() {
+        return [
+            $this->time,
+            [$this->playerFrom->name, $this->playerFrom->color()],
+            [$this->playerTo->name, $this->playerTo->color()],
+            $this->resourceId,
+            $this->fee
+        ];
+    }
 }

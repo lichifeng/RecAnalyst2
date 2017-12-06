@@ -334,7 +334,7 @@ class BodyAnalyzer extends Analyzer
                             $tribute->resourceId = $resourceId;
                             $tribute->amount = floor($amount);
                             $tribute->fee = $marketFee;
-                            $this->tributes[] = $tribute;
+                            $this->tributes[] = $tribute->toArray();
                         } else {
                             $this->position += 8;
                         }
