@@ -351,8 +351,17 @@ class RecordedGame
         }
         foreach ($researchesByMinute as $minute => $researchesByPlayer) {
             foreach ($this->players() as $player) {
+                if ($minute <= floor($player->feudalTime / 1000 / 60)) {
+                    $bg_id = 0;
+                } elseif ($minute <= floor($player->castleTime / 1000 / 60)) {
+                    $bg_id = 1;
+                } elseif ($minute <= floor($player->imperialTime / 1000 / 60)) {
+                    $bg_id = 2;
+                } else {
+                    $bg_id = 3;
+                }
                 $researches[$player->index][$minute] =
-                    $researchesByPlayer[$player->index] ?? [];
+                    $researchesByPlayer[$player->index] ? $researchesByPlayer[$player->index] : [null, $bg_id];
             }
         }
         foreach ($researches as &$timeline) {
