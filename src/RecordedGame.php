@@ -121,7 +121,7 @@ class RecordedGame
      */
     private function openFile()
     {
-        $this->fp = $this->fp ? $this->fp : fopen($this->file, 'r');
+        $this->fp = $this->fp ? $this->fp : @fopen($this->file, 'r');
     }
 
     /**
