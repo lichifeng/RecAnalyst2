@@ -360,8 +360,8 @@ class RecordedGame
                 } else {
                     $bg_id = 3;
                 }
-                $researches[$player->index][$minute] =
-                    $researchesByPlayer[$player->index] ? $researchesByPlayer[$player->index] : [null, $bg_id];
+                $researches[$player->index][$minute][0] = $bg_id;
+                $researches[$player->index][$minute][1] = $researchesByPlayer[$player->index] ?? [];
             }
         }
         foreach ($researches as &$timeline) {
