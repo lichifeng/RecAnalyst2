@@ -105,6 +105,7 @@ class RecordedGame
         } else if (is_object($file_source) && is_a($file_source, 'Illuminate\Http\Request')) {
             // Take the first file found in a Laravel request
             $file_input = $file_source->file();
+            $file_input = reset($file_input);
             $this->file = is_array($file_input) ? $file_input[0] : $file_input;
         } else {
             $this->file = $file_source;

@@ -2,10 +2,8 @@
 
 namespace RecAnalyst\Analyzers;
 
-use RecAnalyst\Model\Unit;
-use RecAnalyst\RecordedGame;
-use RecAnalyst\Model\Tribute;
 use RecAnalyst\Model\ChatMessage;
+use RecAnalyst\Model\Tribute;
 use RecAnalyst\ResourcePacks\AgeOfEmpires\Civilization;
 use RecAnalyst\Utils;
 

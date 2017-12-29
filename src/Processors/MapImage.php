@@ -4,7 +4,6 @@ namespace RecAnalyst\Processors;
 use Intervention\Image\ImageManager;
 use Intervention\Image\ImageManagerStatic;
 use RecAnalyst\RecordedGame;
-use RecAnalyst\Analyzers\HeaderAnalyzer;
 use RecAnalyst\ResourcePacks\AgeOfEmpires\Unit;
 
 /**
@@ -139,7 +138,7 @@ class MapImage
 
         if ($this->showPositions) {
             foreach ($header->players as $player) {
-                if ($player->isCooping || $player->isSpectator()) {
+                if ($player->isCooping() || $player->isSpectator()) {
                     continue;
                 }
 
