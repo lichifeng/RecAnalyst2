@@ -2,8 +2,6 @@
 
 namespace RecAnalyst\Analyzers;
 
-use RecAnalyst\Analyzers\Analyzer;
-
 class Aoe2RecordHeaderAnalyzer extends Analyzer
 {
     public function run()
@@ -120,7 +118,8 @@ class Aoe2RecordHeaderAnalyzer extends Analyzer
         $data['gameTitle'] = $this->readAoe2RecordString();
         $data['moddedDatasetTitle'] = $this->readAoe2RecordString();
         // Not sure if this should be inside the v1005.0 `if`.
-        $data['moddedDatasetWorkshopId'] = $this->readHeader('P', 8);
+        //$data['moddedDatasetWorkshopId'] = $this->readHeader('P', 8);
+        $this->position += 8;
 
         if ($version >= 1005.0) {
             $this->readAoe2RecordString();
@@ -160,7 +159,8 @@ class Aoe2RecordHeaderAnalyzer extends Analyzer
             }
             $playerName = $this->readAoe2RecordString();
             $humanity = $this->readHeader('l', 4);
-            $steamId = $this->readHeader('P', 8);
+            //$steamId = $this->readHeader('P', 8);
+            $this->position += 8;
             $playerIndex = $this->readHeader('l', 4);
             $unknown = $this->readHeader('l', 4); // Seems to be constant 3 among all players so far...
             $scenarioIndex = $this->readHeader('l', 4);
@@ -175,7 +175,7 @@ class Aoe2RecordHeaderAnalyzer extends Analyzer
                 'unknownName' => $unknownName,
                 'playerName' => $playerName,
                 'humanity' => $humanity,
-                'steamId' => $steamId,
+                //'steamId' => $steamId,
                 'playerIndex' => $playerIndex,
                 'unknown' => $unknown,
                 'scenarioIndex' => $scenarioIndex,

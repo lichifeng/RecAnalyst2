@@ -419,7 +419,7 @@ class RecordedGame
     {
         $output = new \stdClass;
         // Record related data
-        $output->isMultiplayers = $this->header()->gameMode;
+        $output->isMultiplayers = !$this->header()->gameMode;
         $output->messages = $this->header()->messages;
         $output->includeAi = $this->header()->includeAi;
         $output->victoryMode = $this->victorySettings()->mode;
