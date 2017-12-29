@@ -2,10 +2,7 @@
 
 namespace RecAnalyst\Analyzers;
 
-use RecAnalyst\Utils;
-use RecAnalyst\Model\Unit;
 use RecAnalyst\Model\Player;
-use RecAnalyst\Model\GameInfo;
 
 /**
  * Analyze extended player information blocks. Should only be composed with the

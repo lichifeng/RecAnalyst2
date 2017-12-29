@@ -6,6 +6,10 @@ use RecAnalyst\RecordedGame;
 
 /**
  * Base class for analyzers.
+ * @property string header
+ * @property string body
+ * @property int headerSize
+ * @property int bodySize
  */
 abstract class Analyzer
 {

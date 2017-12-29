@@ -1,12 +1,11 @@
 <?php
 
-use Webmozart\PathUtil\Path;
 use PHPUnit\Framework\TestCase;
-
-use RecAnalyst\RecordedGame;
+use RecAnalyst\Analyzers\HeaderAnalyzer;
 use RecAnalyst\Model\GameSettings;
 use RecAnalyst\Model\VictorySettings;
-use RecAnalyst\Analyzers\HeaderAnalyzer;
+use RecAnalyst\RecordedGame;
+use Webmozart\PathUtil\Path;
 
 class HeaderAnalyzerTest extends TestCase
 {
@@ -144,6 +143,18 @@ class HeaderAnalyzerTest extends TestCase
 
     public function testCoops()
     {
+        $rec = $this->load('recs/FluffyFur+yousifr+TheBlackWinds+Mobius_One[Chinese]=VS=MOD3000+Chrazini+ClosedLoop+ [AGM]Wineup[Britons]_1v1_8PlayerCo-op_01222015.mgx2');
+        $players = $rec->runAnalyzer(new HeaderAnalyzer)->players;
+
+        $this->assertTrue($players[0]->isCooping());
+        $this->assertTrue($players[1]->isCooping());
+        $this->assertTrue($players[2]->isCooping());
+        $this->assertTrue($players[3]->isCooping());
+        $this->assertTrue($players[4]->isCooping());
+        $this->assertTrue($players[5]->isCooping());
+        $this->assertTrue($players[6]->isCooping());
+        $this->assertTrue($players[7]->isCooping());
+
         $rec = $this->load('recs/coop/coop.mgx');
         $players = $rec->runAnalyzer(new HeaderAnalyzer)->players;
 
@@ -223,14 +234,14 @@ class HeaderAnalyzerTest extends TestCase
                 ['name' => 'Theodoric the Goth'],
             ], 4],
             ['./recs/FluffyFur+yousifr+TheBlackWinds+Mobius_One[Chinese]=VS=MOD3000+Chrazini+ClosedLoop+ [AGM]Wineup[Britons]_1v1_8PlayerCo-op_01222015.mgx2', [
-                ['team' => 1, 'isCooping' => true, 'name' => 'Mobius One'],
-                ['team' => 2, 'isCooping' => true, 'name' => 'MOD3000'],
-                ['team' => 1, 'isCooping' => true, 'name' => 'TheBlackWinds'],
-                ['team' => 1, 'isCooping' => true, 'name' => 'yousifr'],
-                ['team' => 2, 'isCooping' => true, 'name' => 'Chrazini'],
-                ['team' => 2, 'isCooping' => true, 'name' => 'ClosedLoop'],
-                ['team' => 1, 'isCooping' => true, 'name' => 'FluffyFur'],
-                ['team' => 2, 'isCooping' => true, 'name' => '[AGM]Wineup'],
+                ['team' => 1, 'name' => 'Mobius One'],
+                ['team' => 2, 'name' => 'MOD3000'],
+                ['team' => 1, 'name' => 'TheBlackWinds'],
+                ['team' => 1, 'name' => 'yousifr'],
+                ['team' => 2, 'name' => 'Chrazini'],
+                ['team' => 2, 'name' => 'ClosedLoop'],
+                ['team' => 1, 'name' => 'FluffyFur'],
+                ['team' => 2, 'name' => '[AGM]Wineup'],
             ], 2],
             ['./recs/versions/HD Tourney r1 robo_boro vs Dutch Class g1.aoe2record', [
                 ['name' => 'Dutch Class', 'colorId' => 0],

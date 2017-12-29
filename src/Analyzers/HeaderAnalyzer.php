@@ -2,19 +2,21 @@
 
 namespace RecAnalyst\Analyzers;
 
-use RecAnalyst\Map;
-use RecAnalyst\Utils;
-use RecAnalyst\Model\GameInfo;
-use RecAnalyst\Model\Team;
-use RecAnalyst\Model\Tile;
 use RecAnalyst\Model\ChatMessage;
+use RecAnalyst\Model\GameInfo;
 use RecAnalyst\Model\GameSettings;
+use RecAnalyst\Model\Team;
+use RecAnalyst\Utils;
 
 /**
  * Analyzer for most things in a recorded game file header.
+ * @property \StdClass analysis
+ * @property mixed version
  */
 class HeaderAnalyzer extends Analyzer
 {
+    public $includeAi = false;
+
     /**
      * Run the analysis.
      *
@@ -27,16 +29,16 @@ class HeaderAnalyzer extends Analyzer
         $scenarioConstant = pack('c*', 0xF6, 0x28, 0x9C, 0x3F);
         $aokSeparator = pack('c*', 0x9A, 0x99, 0x99, 0x3F);
         $aoe2recordScenarioSeparator = pack('c*', 0xAE, 0x47, 0xA1, 0x3F);
-        $aoe2recordHeaderSeparator = pack('c*', 0xA3, 0x5F, 0x02, 0x00);
+        //$aoe2recordHeaderSeparator = pack('c*', 0xA3, 0x5F, 0x02, 0x00);
 
-        $rec = $this->rec;
+        //$rec = $this->rec;
         $this->analysis = new \StdClass;
         $analysis = $this->analysis;
 
         $playersByIndex = [];
         $gameType = -1;
 
-        $size = strlen($this->header);
+        $size = $this->headerSize;
         $this->position = 0;
 
         $this->version = $this->read(VersionAnalyzer::class);
@@ -63,6 +65,7 @@ class HeaderAnalyzer extends Analyzer
         $includeAi = $this->readHeader('L', 4);
         if ($includeAi !== 0) {
             $this->skipAi();
+            $this->includeAi = true;
         }
 
         $this->position += 4;
@@ -70,6 +73,7 @@ class HeaderAnalyzer extends Analyzer
             $this->position += 4;
             $gameSpeed = $aoe2recordHeader['gameSpeed'];
         } else {
+            // FIXME gameSpeed could be 175 and other, needs verification.
             $gameSpeed = $this->readHeader('l', 4);
         }
         // These bytes contain the game speed again several times over, as ints
@@ -153,6 +157,7 @@ class HeaderAnalyzer extends Analyzer
 
         $players = $this->read(PlayerMetaAnalyzer::class);
         foreach ($players as $player) {
+            // FIXME Players may have save index when cooping
             $playersByIndex[$player->index] = $player;
             if ($player->index === $pov) {
                 $player->owner = true;
@@ -183,6 +188,7 @@ class HeaderAnalyzer extends Analyzer
         $this->position += 8;
 
         foreach ($analysis->players as $i => $player) {
+            // FIXME team always 0?
             $player->team = $teamIndices[$i] - 1;
         }
 
@@ -227,6 +233,7 @@ class HeaderAnalyzer extends Analyzer
             'gameType' => $gameType,
             'gameSpeed' => $gameSpeed,
             'mapSize' => $mapSize,
+            'revealMap' => $revealMap,
             'difficultyLevel' => $difficulty,
             // UserPatch stores the actual population limit divided by 25.
             'popLimit' => $version->isUserPatch ? $popLimit * 25 : $popLimit,
@@ -241,6 +248,9 @@ class HeaderAnalyzer extends Analyzer
 
         $gameInfo = new GameInfo($this->rec);
 
+        $analysis->includeAi = $this->includeAi;
+        $analysis->version = $version->name();
+        $analysis->gameMode = $gameMode;
         $analysis->mapData = $mapData->terrain;
         $analysis->pregameChat = Utils::msgToArray($pregameChat);
         $analysis->gameSettings = new GameSettings($this->rec, $gameSettings);

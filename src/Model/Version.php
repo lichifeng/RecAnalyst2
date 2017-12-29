@@ -4,6 +4,21 @@ namespace RecAnalyst\Model;
 
 use RecAnalyst\RecordedGame;
 
+/**
+ * @property bool isAoK
+ * @property bool isAoC
+ * @property bool isUserPatch
+ * @property bool isHDEdition
+ * @property  version
+ * @property bool isTrial
+ * @property bool isUserPatch15
+ * @property bool isHDPatch4
+ * @property bool isMgl
+ * @property bool isMgx
+ * @property bool isMgz
+ * @property bool isMsx
+ * @property bool isAoe2Record
+ */
 class Version
 {
     /**
@@ -152,6 +167,8 @@ class Version
      * @var int
      */
     const VERSION_HD50 = 19;
+
+    public $version;
 
     /**
      * Recorded game instance.

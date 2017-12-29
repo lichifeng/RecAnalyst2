@@ -2,10 +2,7 @@
 
 namespace RecAnalyst\Model;
 
-use RecAnalyst\Model\Team;
 use RecAnalyst\RecordedGame;
-use RecAnalyst\Model\Research;
-use RecAnalyst\Model\InitialState;
 
 /**
  * The Player class represents a player in the game. This includes co-op players.
@@ -67,7 +64,7 @@ class Player
      *
      * @var int
      */
-    public $teamIndex = -1;
+    public $team = -1;
 
     /**
      * Defines if player is an owner of the game.
@@ -89,14 +86,6 @@ class Player
      * @var int
      */
     public $colorId = -1;
-
-    /**
-     * Indicates if the player is cooping in the game.
-     *
-     * @deprecated 5.0.0 Use the {@link isCooping()} method instead.
-     * @var bool
-     */
-    public $isCooping = false;
 
     /**
      * Player's feudal time (in ms, 0 if hasn't been reached).
@@ -136,8 +125,10 @@ class Player
 
     /**
      * Co-op partners.
+     *
+     * @var \RecAnalyst\Model\Player[]
      */
-    private $coopPartners;
+    private $coopPartners = [];
 
     /**
      * Contains the player's initial state, such as starting resources
@@ -150,7 +141,7 @@ class Player
     /**
      * Class constructor.
      *
-     * @param \RecAnalyst\RecordedGame|null  $rec  Recorded game instance.
+     * @param \RecAnalyst\RecordedGame|null $rec Recorded game instance.
      * @return void
      */
     public function __construct(RecordedGame $rec = null)
@@ -173,28 +164,28 @@ class Player
      * Get the player's team.
      *
      * @return \RecAnalyst\Model\Team|null
+     * TODO return the index of team is enough?
      */
     public function team()
     {
         $teams = $this->rec->teams();
         foreach ($teams as $team) {
-            if ($team->index() === $this->teamIndex) {
+            if ($team->index() === $this->team) {
                 return $team;
             }
         }
+        return null;
     }
 
     /**
      * Set the player's co-op partner group.
      *
      * @internal Only for use by Analyzers.
-     * @param array  $partners  Players in this group, including this player.
+     * @param array $partners Players in this group, including this player.
      */
     public function setCoopPartners(array $partners)
     {
         $this->coopPartners = $partners;
-        // Compatibility with v4.1.0 and below.
-        $this->isCooping = $this->isCooping();
     }
 
     /**
@@ -250,6 +241,11 @@ class Player
         return count($this->coopPartners) > 1;
     }
 
+    /**
+     * Returns whether the player is a spectator
+     *
+     * @return bool
+     */
     public function isSpectator()
     {
         return $this->spectator;
@@ -287,8 +283,8 @@ class Player
     /**
      * Add a research action.
      *
-     * @param int  $id  Research ID.
-     * @param int  $time  Research completion time.
+     * @param int $id Research ID.
+     * @param int $time Research completion time.
      */
     public function addResearch($id, $time)
     {

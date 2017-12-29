@@ -6,6 +6,7 @@ use RecAnalyst\Model\Version;
 
 /**
  * Determine the game version that created the recorded game file.
+ * @property  isMgx
  */
 class VersionAnalyzer extends Analyzer
 {
@@ -130,6 +131,7 @@ class VersionAnalyzer extends Analyzer
     {
         switch ($version) {
             case 'TRL 9.3':
+                // FIXME $this->isMgx is not defined yet
                 return $this->isMgx ? Version::VERSION_AOCTRIAL : Version::VERSION_AOKTRIAL;
             case 'VER 9.3':
                 return Version::VERSION_AOK;
@@ -151,6 +153,7 @@ class VersionAnalyzer extends Analyzer
                 if ($subVersion > 11.76) {
                     return Version::VERSION_HD;
                 }
+                // FIXME which version of AOC? A or C? Can we tell by subversion?
                 return Version::VERSION_AOC;
             case 'VER 9.5':
                 return Version::VERSION_AOFE21;

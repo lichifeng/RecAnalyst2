@@ -2,12 +2,10 @@
 
 namespace RecAnalyst;
 
-use RecAnalyst\BasicTranslator;
-use RecAnalyst\StreamExtractor;
 use RecAnalyst\Analyzers\Analyzer;
-use RecAnalyst\Processors\MapImage;
+use RecAnalyst\Model\Player;
 use RecAnalyst\Processors\Achievements;
-use RecAnalyst\ResourcePacks\ResourcePack;
+use RecAnalyst\Processors\MapImage;
 
 /**
  * Represents a recorded game file.
@@ -26,7 +24,7 @@ class RecordedGame
      *
      * @var resource
      */
-    private $fp;
+    private $fp = false;
 
     /**
      * Current resource pack.
@@ -48,15 +46,14 @@ class RecordedGame
     /**
      * Record file
      */
-    public $file;
-
+    public $file = null;
 
 
     /**
      * Create a recorded game analyser.
      *
-     * @param  resource|string|\SplFileInfo| Illuminate\Http\Request  $file_source  Path or handle to the recorded game file.
-     * @param  array  $options
+     * @param  resource|string|\SplFileInfo| Illuminate\Http\Request $file_source Path or handle to the recorded game file.
+     * @param  array $options
      * @return void
      */
     public function __construct($file_source = null, array $options = [])
@@ -96,24 +93,24 @@ class RecordedGame
      *
      * @param $file_source
      */
-    private function retrieveFile($file_source) {
+    private function retrieveFile($file_source)
+    {
         // Set the file name and file pointer/handle/resource. (pick your
         // favourite name…!)
         if (is_resource($file_source)) {
             $this->fp = $file_source;
-            $this->file = '';
+            $this->file = null;
         } else if (is_object($file_source) && is_a($file_source, 'SplFileInfo')) {
             $this->file = $file_source->getRealPath();
         } else if (is_object($file_source) && is_a($file_source, 'Illuminate\Http\Request')) {
             // Take the first file found in a Laravel request
             $file_input = $file_source->file();
-            $file_input = reset($file_input);
             $this->file = is_array($file_input) ? $file_input[0] : $file_input;
         } else {
             $this->file = $file_source;
         }
     }
-    
+
     /**
      * Create a file handle for the recorded game file.
      *
@@ -137,7 +134,7 @@ class RecordedGame
     /**
      * Run an analysis on the current game.
      *
-     * @param  \RecAnalyst\Analyzers\Analyzer  $analyzer
+     * @param  \RecAnalyst\Analyzers\Analyzer $analyzer
      * @return mixed
      */
     public function runAnalyzer(Analyzer $analyzer)
@@ -148,9 +145,9 @@ class RecordedGame
     /**
      * Get an analysis result for a specific analyzer, running it if necessary.
      *
-     * @param string  $analyzerName  Fully qualified name of the analyzer class.
-     * @param mixed  $arg  Optional argument to the analyzer.
-     * @param int  $startAt  Position to start at.
+     * @param string $analyzerName Fully qualified name of the analyzer class.
+     * @param mixed $arg Optional argument to the analyzer.
+     * @param int $startAt Position to start at.
      * @return mixed
      */
     public function getAnalysis($analyzerName, $arg = null, $startAt = 0)
@@ -241,7 +238,7 @@ class RecordedGame
      * Render a map image.
      *
      * @see \RecAnalyst\Processors\MapImage
-     * @param array  $options  Rendering options.
+     * @param array $options Rendering options.
      * @return \Intervention\Image Rendered image.
      */
     public function mapImage(array $options = [])
@@ -272,7 +269,7 @@ class RecordedGame
         if (isset($this->players)) {
             return $this->players;
         }
-        $this->players =  array_filter($this->header()->players, function ($player) {
+        $this->players = array_filter($this->header()->players, function (Player $player) {
             return !$player->isSpectator();
         });
         return $this->players;
@@ -286,7 +283,7 @@ class RecordedGame
      */
     public function spectators()
     {
-        return array_filter($this->header()->players, function ($player) {
+        return array_filter($this->header()->players, function (Player $player) {
             return $player->isSpectator();
         });
     }
@@ -304,12 +301,14 @@ class RecordedGame
                 return $player;
             }
         }
+
+        throw new RecAnalystException('FOV information is not found.', 0x0008);
     }
 
     /**
      * Get a player by their index.
      *
-     * @param int  $id  Player index.
+     * @param int $id Player index.
      * @return \RecAnalyst\Model\Player|null
      */
     public function getPlayer($id)
@@ -319,12 +318,15 @@ class RecordedGame
                 return $player;
             }
         }
+
+        throw new RecAnalystException('Player of specified index is not found.', 0x0009);
     }
 
     /**
      * Get the player achievements.
      *
-     * return \StdClass[] Achievements for each player.
+     * @param array $options
+     * @return \StdClass[] Achievements for each player.
      */
     public function achievements(array $options = [])
     {
@@ -337,7 +339,8 @@ class RecordedGame
      *
      * @return array
      */
-    public function researchTable() {
+    public function researchTable()
+    {
         $researches = [];
         foreach ($this->players() as $player) {
             $researches[$player->index] = [];
@@ -364,8 +367,8 @@ class RecordedGame
                 $researches[$player->index][$minute][1] = $researchesByPlayer[$player->index] ?? [];
             }
         }
-        foreach ($researches as &$timeline) {
-            ksort($timeline, SORT_NUMERIC);
+        foreach ($researches as &$timeLine) {
+            ksort($timeLine, SORT_NUMERIC);
         }
         return $researches;
     }
@@ -373,6 +376,7 @@ class RecordedGame
     /**
      * Get a translate key for use with Symfony or Laravel Translations.
      *
+     * @param $args
      * @return string A translation key.
      */
     private function getTranslateKey($args)
@@ -405,5 +409,100 @@ class RecordedGame
     {
         $key = $this->getTranslateKey(func_get_args());
         return $this->getTranslator()->trans($key);
+    }
+
+    /**
+     * @return \stdClass
+     */
+    public function output()
+    {
+        $output = new \stdClass;
+        // Record related data
+        $output->isMultiplayers = $this->header()->gameMode;
+        $output->messages = $this->header()->messages;
+        $output->includeAi = $this->header()->includeAi;
+        $output->victoryMode = $this->victorySettings()->mode;
+        $output->battleMode = $this->header()->gameInfo->getPlayersString();
+        $output->mapName = $this->header()->gameSettings->mapName();
+        $output->mapSize = $this->header()->gameSettings->mapSizeName();
+        $output->gameType = $this->header()->gameSettings->gameTypeName();
+        $output->difficulty = $this->header()->gameSettings->difficultyName();
+        $output->gameSpeed = $this->header()->gameSettings->gameSpeed;
+        $output->revealMap = $this->header()->gameSettings->revealMapName();
+        $output->mapId = $this->header()->gameSettings->mapId;
+        $output->popLimit = $this->header()->gameSettings->getPopLimit();
+        $output->lockDiplomacy = $this->header()->gameSettings->getLockDiplomacy();
+        $output->mapStyle = $this->header()->gameSettings->mapStyle();
+        $output->startingAge = $this->pov()->startingAge();
+        $output->duration = $this->body()->duration;
+        $output->researchTable = $this->researchTable();
+        $output->teams = $this->teamAndWinner();
+        $output->mapImage = $this->mapImage()->resize(360, 180);
+        $output->version = $this->version()->name();
+        $output->tributes = $this->body()->tributes;
+        $output->units = $this->body()->units;
+        $output->gameMd5 = $this->calculateGameMd5(
+            $output->version,
+            $output->battleMode,
+            $output->mapName,
+            $output->mapSize,
+            $output->mapId,
+            $output->mapImage->encode('data-url')
+        );
+
+        // Player independent data
+        $output->recMd5 = $this->file === null ? null : md5_file($this->file);
+        $output->ingameChat = $this->body()->chatMessages;
+        $output->pregameChat = $this->header()->pregameChat;
+        $output->players = $this->players();
+
+        return $output;
+    }
+
+    protected function calculateGameMd5($version, $battleMode, $mapName, $mapSize, $mapId, $mapSalt)
+    {
+        $player_salt = [];
+        foreach ($this->players() as $p) {
+            $player_salt[] = $p->index . $p->name . $p->civId;
+        }
+        sort($player_salt);
+        $player_salt = implode($player_salt);
+        $rec_salt =
+            $version .
+            $battleMode .
+            $mapName .
+            $mapSize .
+            $mapId .
+            $player_salt .
+            $mapSalt;
+        return md5($rec_salt);
+    }
+
+    protected function teamAndWinner()
+    {
+        $teams = [];
+        foreach ($this->teams() as $team) {
+            $teams[$team->index()]["is_winner"] = false;
+            $resigned = 0;
+            $player_sum = count($team->players());
+            foreach ($team->players() as $player) {
+                $teams[$team->index()]["players"][] = [$player->index, $player->number];
+                if ($player->resignTime > 0) {
+                    $resigned += 1;
+                }
+            }
+            $teams[$team->index()]["confidence_index_of_loser"] = $resigned / $player_sum;
+        }
+        $most_possible_winner_index = 0;
+        $minimal_loser_val = 1;
+        foreach ($teams as $index => $team) {
+            if ($team['confidence_index_of_loser'] <= $minimal_loser_val) {
+                $most_possible_winner_index = $index;
+                $minimal_loser_val = $team['confidence_index_of_loser'];
+            }
+        }
+        $teams[$most_possible_winner_index]['is_winner'] = true;
+
+        return $teams;
     }
 }

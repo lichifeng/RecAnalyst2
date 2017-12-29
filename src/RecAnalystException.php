@@ -46,6 +46,16 @@ class RecAnalystException extends \Exception
     const HEADER_DECOMPRESSERROR = 0x0007;
 
     /**
+     * FOV information is not found
+     */
+    const POV_NOT_FOUND = 0x0008;
+
+    /**
+     * Player of specified index is not found
+     */
+    const PLAYER_NOT_FOUND = 0x0009;
+
+    /**
      * Class constructor.
      *
      * @param  string  $msg  Exception message
