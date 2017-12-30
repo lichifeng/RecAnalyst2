@@ -444,6 +444,7 @@ class RecordedGame
         $output->version = $this->version()->name();
         $output->tributes = $this->body()->tributes;
         $output->units = $this->body()->units;
+        $output->pov = $this->pov();
         $output->gameMd5 = $this->calculateGameMd5(
             $output->version,
             $output->battleMode,
@@ -462,7 +463,7 @@ class RecordedGame
         return $output;
     }
 
-    protected function getBuildings($index)
+    public function getBuildings($index)
     {
         return isset($this->body()->buildings[$index]) ? $this->body()->buildings[$index] : [];
     }
