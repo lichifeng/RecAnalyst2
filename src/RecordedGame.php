@@ -510,6 +510,9 @@ class RecordedGame
             }
         }
         $teams[$most_possible_winner_index]['is_winner'] = true;
+        if (array_key_exists($most_possible_winner_index, $this->teams())) {
+            $this->teams()[$most_possible_winner_index]->isWinner = true;
+        }
 
         return $teams;
     }

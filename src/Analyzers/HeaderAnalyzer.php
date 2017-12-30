@@ -513,7 +513,6 @@ class HeaderAnalyzer extends Analyzer
      */
     protected function buildTeams($players)
     {
-        $teams = [];
         $teamsByIndex = [];
         foreach ($players as $player) {
             /**
@@ -523,7 +522,7 @@ class HeaderAnalyzer extends Analyzer
              */
             if ($player->team == 0) {
                 $found = false;
-                foreach ($teams as $team) {
+                foreach ($teamsByIndex as $team) {
                     if ($team->index() != $player->team) {
                         continue;
                     }
@@ -539,7 +538,6 @@ class HeaderAnalyzer extends Analyzer
                 if (!$found) {
                     $team = new Team();
                     $team->addPlayer($player);
-                    $teams[] = $team;
                     $teamsByIndex[$player->team] = $team;
                 }
             } else {
@@ -548,12 +546,11 @@ class HeaderAnalyzer extends Analyzer
                 } else {
                     $team = new Team();
                     $team ->addPlayer($player);
-                    $teams[] = $team;
                     $teamsByIndex[$player->team] = $team;
                 }
             }
         }
 
-        return $teams;
+        return $teamsByIndex;
     }
 }
