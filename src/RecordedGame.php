@@ -47,7 +47,7 @@ class RecordedGame
      * Record file
      */
     public $file = null;
-    public $file_md5 = null;
+    public $fileMd5 = null;
 
 
     /**
@@ -108,7 +108,7 @@ class RecordedGame
             $file_input = $file_source->file();
             $file_input = reset($file_input);
             $this->file = is_array($file_input) ? $file_input[0] : $file_input;
-            $this->file_md5 = md5_file($this->file);
+            $this->fileMd5 = md5_file($this->file);
         } else {
             $this->file = $file_source;
         }
@@ -455,7 +455,7 @@ class RecordedGame
         );
 
         // Player independent data
-        $output->recMd5 = $this->file_md5 === null ? null : $this->file;
+        $output->recMd5 = $this->fileMd5 === null ? null : $this->fileMd5;
         $output->ingameChat = $this->body()->chatMessages;
         $output->pregameChat = $this->header()->pregameChat;
         $output->players = $this->players();
