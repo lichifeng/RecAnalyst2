@@ -2,7 +2,6 @@
 
 namespace RecAnalyst\Model;
 
-use RecAnalyst\Model\Player;
 use RecAnalyst\Utils;
 
 /**
@@ -49,12 +48,12 @@ class ChatMessage
      * @param string  $group  Group this message was directed to.
      * @return void
      */
-    public function __construct($time = 0, $name = '', $msg = '', $group = '')
+    public function __construct($time = 0, $name = '', $msg = '', $group = '', $convertToUTF8 = false)
     {
         $this->time = $time;
-        $this->player_name = Utils::stringToUTF8($name);
-        $this->msg = Utils::stringToUTF8($msg);
-        $this->group = Utils::stringToUTF8($group);
+        $this->player_name = $convertToUTF8 ? Utils::stringToUTF8($name) : $name;
+        $this->msg = $convertToUTF8 ? Utils::stringToUTF8($msg) : $msg;
+        $this->group = $convertToUTF8 ? Utils::stringToUTF8($group) : $group;
     }
 
     /**
@@ -85,7 +84,7 @@ class ChatMessage
      * @param string  $chat  Message contents.
      * @return ChatMessage
      */
-    public static function create($time, $chat)
+    public static function create($time, $chat, $convertToUTF8 = false)
     {
         $group = '';
         // This is directed someplace (@All, @Team, @Enemy, etc.)
@@ -108,10 +107,17 @@ class ChatMessage
             }
         }
 
-        $name = substr($chat, 0, strpos($chat, ':'));
-        $name = ltrim($name);
-        // Cut the player name out of the message contents.
-        $chat = ltrim(substr($chat, strlen($name) + 2));
-        return new self($time, $name, $chat, $group);
+        if ($convertToUTF8 === false) {
+            $name = substr($chat, 0, strpos($chat, ':'));
+            $name = trim($name);
+            // Cut the player name out of the message contents.
+            $chat = trim(substr($chat, strpos($chat, ':') + 1));
+        } else {
+            $name = substr($chat, 0, strpos($chat, ':'));
+            $name = ltrim($name);
+            // Cut the player name out of the message contents.
+            $chat = ltrim(substr($chat, strlen($name) + 2));
+        }
+        return new self($time, $name, $chat, $group, $convertToUTF8);
     }
 }

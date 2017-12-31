@@ -71,9 +71,9 @@ class HeaderAnalyzer extends Analyzer
         $this->position += 4;
         if ($version->isAoe2Record) {
             $this->position += 4;
+            // FIXME gameSpeed could be 175 and other, needs verification.
             $gameSpeed = $aoe2recordHeader['gameSpeed'];
         } else {
-            // FIXME gameSpeed could be 175 and other, needs verification.
             $gameSpeed = $this->readHeader('l', 4);
         }
         // These bytes contain the game speed again several times over, as ints
@@ -157,7 +157,7 @@ class HeaderAnalyzer extends Analyzer
 
         $players = $this->read(PlayerMetaAnalyzer::class);
         foreach ($players as $player) {
-            // FIXME Players may have save index when cooping
+            // FIXME Players may have same index when cooping
             $playersByIndex[$player->index] = $player;
             if ($player->index === $pov) {
                 $player->owner = true;
@@ -292,7 +292,12 @@ class HeaderAnalyzer extends Analyzer
             // colour)
             if ($chat[0] == '@' && $chat[1] == '#' && $chat[2] >= '1' && $chat[2] <= '8') {
                 $chat = rtrim($chat); // throw null-termination character
-                $messages[] = ChatMessage::create(null, substr($chat, 3));
+                if ($this->version->isAoe2Record) {
+                    $convertToUTF8 = false;
+                } else {
+                    $convertToUTF8 = true;
+                }
+                $messages[] = ChatMessage::create(null, substr($chat, 3), $convertToUTF8);
             }
         }
         return $messages;

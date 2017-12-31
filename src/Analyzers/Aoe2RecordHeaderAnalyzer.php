@@ -168,7 +168,7 @@ class Aoe2RecordHeaderAnalyzer extends Analyzer
             $players[] = [
                 'datCrc' => $datCrc,
                 'mpVersion' => $mpVersion,
-                'teamIndex' => $teamIndex,
+                'team' => $teamIndex,
                 'civId' => $civId,
                 'aiBaseName' => $aiBaseName,
                 'aiCivNameIndex' => $aiCivNameIndex,

@@ -8,6 +8,7 @@ use RecAnalyst\Utils;
 /**
  * Analyze the small player metadata block. Can be composed or run
  * independently.
+ * @property mixed version
  */
 class PlayerMetaAnalyzer extends Analyzer
 {
@@ -18,6 +19,7 @@ class PlayerMetaAnalyzer extends Analyzer
      */
     protected function run()
     {
+        $this->version = $this->get(VersionAnalyzer::class);
         $isComposed = $this->position > 0;
         if (!$isComposed) {
             // If this analyzer was not called from another analyzer at a
@@ -67,7 +69,11 @@ class PlayerMetaAnalyzer extends Analyzer
         $human = $this->readHeader('l', 4);
         $length = $this->readHeader('L', 4);
         if ($length) {
-            $player->name = Utils::stringToUTF8($this->readHeaderRaw($length));
+            if ($this->version->isAoe2Record) {
+                $player->name = $this->readHeaderRaw($length);
+            } else {
+                $player->name = Utils::stringToUTF8($this->readHeaderRaw($length));
+            }
         } else {
             $player->name = '';
         }
@@ -82,8 +88,6 @@ class PlayerMetaAnalyzer extends Analyzer
      */
     private function seek()
     {
-        $version = $this->get(VersionAnalyzer::class);
-
         $constant2 = pack('c*', 0x9A, 0x99, 0x99, 0x99, 0x99, 0x99, 0xF9, 0x3F);
         $separator = pack('c*', 0x9D, 0xFF, 0xFF, 0xFF);
 
@@ -96,7 +100,7 @@ class PlayerMetaAnalyzer extends Analyzer
         $gameSettingsPos = strrpos($this->header, $separator, -($size - $triggerInfoPos)) + strlen($separator);
 
         $this->position = $gameSettingsPos + 8;
-        if (!$version->isAoK) {
+        if (!$this->version->isAoK) {
             // Skip Map ID.
             $this->position += 4;
         }
@@ -104,7 +108,7 @@ class PlayerMetaAnalyzer extends Analyzer
         $this->position += 8;
 
         // TODO Is 12.3 the correct cutoff point?
-        if ($version->subVersion >= 12.3) {
+        if ($this->version->subVersion >= 12.3) {
             // TODO what are theeeese?
             $this->position += 16;
         }
