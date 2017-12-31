@@ -237,10 +237,12 @@ class BodyAnalyzer extends Analyzer
                             $player->resignTime = $this->currentTime;
                             if ($this->version->isAoe2Record) {
                                 $message = sprintf('%s 投降!', $player->name);
+                                $convertToUTF8 = false;
                             } else {
                                 $message = mb_convert_encoding(sprintf('%s 投降!', $player->name), 'gbk', 'UTF-8');
+                                $convertToUTF8 = true;
                             }
-                            $this->chatMessages[] = new ChatMessage($this->currentTime, $message);
+                            $this->chatMessages[] = new ChatMessage($this->currentTime, $message, '', '', $convertToUTF8);
                         }
                         break;
                     // researches
@@ -407,9 +409,15 @@ class BodyAnalyzer extends Analyzer
                 // Skip messages like "--Warning: You are under attack... --"
                 return;
             }
+            if ($this->version->isAoe2Record) {
+                $convertToUTF8 = false;
+            } else {
+                $convertToUTF8 = true;
+            }
             $this->chatMessages[] = ChatMessage::create(
                 $this->currentTime,
-                substr($chat, 3)
+                substr($chat, 3),
+                $convertToUTF8
             );
         }
     }
