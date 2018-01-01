@@ -188,7 +188,6 @@ class HeaderAnalyzer extends Analyzer
         $this->position += 8;
 
         foreach ($analysis->players as $i => $player) {
-            // FIXME team always 0?
             $player->team = $teamIndices[$i] - 1;
         }
 
@@ -528,9 +527,6 @@ class HeaderAnalyzer extends Analyzer
             if ($player->team == 0) {
                 $found = false;
                 foreach ($teamsByIndex as $team) {
-                    if ($team->index() != $player->team) {
-                        continue;
-                    }
                     foreach ($team->players() as $coopPlayer) {
                         if ($coopPlayer->index == $player->index) {
                             $team->addPlayer($player);
@@ -538,10 +534,15 @@ class HeaderAnalyzer extends Analyzer
                             break;
                         }
                     }
+                    if ($found) {
+                        break;
+                    } else {
+                        continue;
+                    }
                 }
                 // Not a cooping player, so add them to their own team.
                 if (!$found) {
-                    $team = new Team();
+                    $team = array_key_exists(0, $teamsByIndex) ? $teamsByIndex[0] : new Team();
                     $team->addPlayer($player);
                     $teamsByIndex[$player->team] = $team;
                 }

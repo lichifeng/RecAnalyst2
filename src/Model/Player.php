@@ -164,7 +164,6 @@ class Player
      * Get the player's team.
      *
      * @return \RecAnalyst\Model\Team|null
-     * TODO return the index of team is enough?
      */
     public function team()
     {

@@ -54,32 +54,37 @@ class GameInfo
     public function getPlayersString()
     {
         $teams = $this->rec->teams();
-
-        $teamMembers = [];
+        $player_counts_tn = [];
+        $player_counts_t0 = [];
+        $counted_players = [];
         foreach($teams as $team) {
-            $coopingCount = [];
-            if ( !($team->index() === 0 && isset($teamMembers[$team->index()]) ) )
-                $teamMembers[$team->index()] = 0;
-            foreach($team->players() as $player) {
-                if ( $player->isCooping() ) {
-                    if ( !isset($coopingCount[$player->index]) ) {
-                        $coopingCount[$player->index] = true;
-                        $teamMembers[$team->index()]++;
+            if ($team->index() === 0) {
+                foreach ($team->players() as $p) {
+                    if (in_array($p->index, $counted_players)) {
+                        continue;
+                    } else {
+                        $player_counts_t0[] = 1;
+                        $counted_players[] = $p->index;
                     }
-                } else {
-                    $teamMembers[$team->index()]++;
+                }
+            } else {
+                foreach ($team->players() as $p) {
+                    if (in_array($p->index, $counted_players)) {
+                        continue;
+                    } else {
+                        if (array_key_exists($team->index(), $player_counts_tn)) {
+                            $player_counts_tn[$team->index()] += 1;
+                        } else {
+                            $player_counts_tn[$team->index()] = 1;
+                        }
+                        $counted_players[] = $p->index;
+                    }
                 }
             }
         }
-        // Remove teams without players.
-        $teamMembers = array_diff($teamMembers, [0]);
-        if (array_sum($teamMembers) === count($teams) && count($teams) > 2) {
-            return '混战';
-        } elseif(count($teams) === 2 && array_sum($teamMembers) === 2){
-            return '1v1';
-        } else {
-            return implode('v', $teamMembers);
-        }
+        $player_counts = array_merge($player_counts_tn, $player_counts_t0);
+        sort($player_counts);
+        return implode('v', $player_counts);
     }
 
     /**
