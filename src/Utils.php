@@ -16,14 +16,14 @@ class Utils
      * @return string Formatted string, or "-" if the time is 0. (Zero usually
      *     means "did not occur" or "unknown" in recorded game timestamps.)
      */
-    public static function formatGameTime($time, $format = '%02d:%02d:%02d')
+    public static function formatGameTime($time, $format = '%02d:%02d:%02d', $ms_fix = 1000)
     {
         if ($time == 0) {
             return '-';
         }
-        $hour = (int)($time / 1000 / 3600);
-        $minute = ((int)($time / 1000 / 60)) % 60;
-        $second = ((int)($time / 1000)) % 60;
+        $hour = (int)($time / $ms_fix / 3600);
+        $minute = ((int)($time / $ms_fix / 60)) % 60;
+        $second = ((int)($time / $ms_fix)) % 60;
         return sprintf($format, $hour, $minute, $second);
     }
 
