@@ -1,6 +1,7 @@
 <?php
 
 namespace RecAnalyst\Analyzers;
+use RecAnalyst\Utils;
 
 /**
  * Analyze a UserPatch post-game data block, containing achievements.
@@ -40,7 +41,10 @@ class PostgameDataAnalyzer extends Analyzer
         $players = [];
         for ($i = 0; $i < 8; $i++) {
             $playerStats = new \stdClass;
-            $playerStats->name = rtrim($this->readBodyRaw(16));
+            $playerStats->name = Utils::stringToUTF8(rtrim($this->readBodyRaw(16)));
+            if($playerStats->name === '') {
+                continue;
+            }
             $playerStats->totalScore = $this->readBody('v', 2);
             $totalScores = [];
             for ($j = 0; $j < 8; $j++) {

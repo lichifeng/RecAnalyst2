@@ -444,6 +444,7 @@ class RecordedGame
         $output->version = $this->version()->name();
         $output->tributes = $this->body()->tributes;
         $output->units = $this->body()->units;
+        $output->postGameData = $this->body()->postGameData->players;
         $output->pov = $this->pov();
         $output->gameMd5 = $this->calculateGameMd5(
             $output->version,
