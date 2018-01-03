@@ -24,6 +24,14 @@ class MapName
      */
     private $mapTypeRegexes;
 
+    public $lang_map = [
+        'jp' => 'cp932',
+        'ko' => 'cp949',
+        'ru' => 'windows-1251',
+        'zh' => 'cp936',
+        'zh_wide' => 'cp936'
+    ];
+
     /**
      * Create a map name extractor.
      *
@@ -74,10 +82,14 @@ class MapName
         foreach ($lines as $line) {
             // We don't know what language the game was played in, so we try
             // every language we know.
-            foreach ($this->mapTypeRegexes as $rx) {
+            foreach ($this->mapTypeRegexes as $lang => $rx) {
                 $matches = [];
                 if (preg_match($rx, $line, $matches)) {
-                    return $matches[1];
+                    if(array_key_exists($lang, $this->lang_map)) {
+                        return mb_convert_encoding($matches[1], 'utf-8', $this->lang_map[$lang]);
+                    } else {
+                        return $matches[1];
+                    }
                 }
             }
         }

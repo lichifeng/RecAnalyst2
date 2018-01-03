@@ -18,7 +18,7 @@ class Utils
      */
     public static function formatGameTime($time, $ms_fix = 1000, $format = '%02d:%02d:%02d')
     {
-        if ($time == 0) {
+        if ($time <= 0) {
             return '-';
         }
         $hour = (int)($time / $ms_fix / 3600);
