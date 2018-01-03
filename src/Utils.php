@@ -16,7 +16,7 @@ class Utils
      * @return string Formatted string, or "-" if the time is 0. (Zero usually
      *     means "did not occur" or "unknown" in recorded game timestamps.)
      */
-    public static function formatGameTime($time, $format = '%02d:%02d:%02d', $ms_fix = 1000)
+    public static function formatGameTime($time, $ms_fix = 1000, $format = '%02d:%02d:%02d')
     {
         if ($time == 0) {
             return '-';
