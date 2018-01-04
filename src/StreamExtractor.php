@@ -79,8 +79,8 @@ class StreamExtractor
         $initialBase = ftell($this->fp);
 
         $base = $initialBase;
-        $buffer = fread($this->fp, 8192);
-        while ($buffer !== false) {
+        $buffer = '';
+        while (($buffer = fread($this->fp, 8192)) !== false) {
             $index = strpos($buffer, $separator);
             if ($index !== false) {
                 $this->headerLen = $base + $index - 4;
