@@ -449,8 +449,7 @@ class RecordedGame
         $output->gameMd5 = $this->calculateGameMd5(
             $output->version,
             $output->battleMode,
-            $output->mapId,
-            $this->mapDataHash($this->header()->mapData)
+            $output->mapId
         );
 
         // Player independent data
@@ -471,7 +470,7 @@ class RecordedGame
     {
         $player_salt = [];
         foreach ($this->players() as $p) {
-            $player_salt[] = $p->index . $p->name . $p->civId;
+             $player_salt[] = $p->index . $p->name . $p->civId . $p->position()[0] . $p->position()[1];
         }
         sort($player_salt);
         $player_salt = implode($player_salt);
@@ -479,8 +478,7 @@ class RecordedGame
             $version .
             $battleMode .
             $mapId .
-            $player_salt .
-            $mapSalt;
+            $player_salt;
         return md5($rec_salt);
     }
 
@@ -513,17 +511,5 @@ class RecordedGame
         }
 
         return $teams;
-    }
-
-    protected function mapDataHash($mapData) {
-        $str = '';
-        foreach ($mapData as $k => $v) {
-            $str .= $k;
-            foreach ($v as $kt => $vt) {
-                $str .= $kt;
-                $str .= implode($vt->toArray());
-            }
-        }
-        return md5($str);
     }
 }
