@@ -449,8 +449,6 @@ class RecordedGame
         $output->gameMd5 = $this->calculateGameMd5(
             $output->version,
             $output->battleMode,
-            $output->mapName,
-            $output->mapSize,
             $output->mapId,
             $this->mapDataHash($this->header()->mapData)
         );
@@ -469,7 +467,7 @@ class RecordedGame
         return isset($this->body()->buildings[$index]) ? $this->body()->buildings[$index] : [];
     }
 
-    protected function calculateGameMd5($version, $battleMode, $mapName, $mapSize, $mapId, $mapSalt)
+    protected function calculateGameMd5($version, $battleMode, $mapId, $mapSalt)
     {
         $player_salt = [];
         foreach ($this->players() as $p) {
@@ -480,8 +478,6 @@ class RecordedGame
         $rec_salt =
             $version .
             $battleMode .
-            $mapName .
-            $mapSize .
             $mapId .
             $player_salt .
             $mapSalt;
