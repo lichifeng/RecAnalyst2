@@ -466,7 +466,7 @@ class RecordedGame
         return isset($this->body()->buildings[$index]) ? $this->body()->buildings[$index] : [];
     }
 
-    protected function calculateGameMd5($version, $battleMode, $mapId, $mapSalt)
+    protected function calculateGameMd5($version, $battleMode, $mapId)
     {
         $player_salt = [];
         foreach ($this->players() as $p) {
