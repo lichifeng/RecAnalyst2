@@ -444,15 +444,12 @@ class RecordedGame
         $output->version = $this->version()->name();
         $output->tributes = $this->body()->tributes;
         $output->units = $this->body()->units;
-        $output->postGameData = isset($this->body()->postGameData->players) ?: null;
+        $output->postGameData = isset($this->body()->postGameData->players) ? $this->body()->postGameData->players : null;
         $output->pov = $this->pov();
         $output->gameMd5 = $this->calculateGameMd5(
             $output->version,
             $output->battleMode,
-            $output->mapName,
-            $output->mapSize,
-            $output->mapId,
-            $output->mapImage->encode('data-url')
+            $output->mapId
         );
 
         // Player independent data
@@ -469,22 +466,19 @@ class RecordedGame
         return isset($this->body()->buildings[$index]) ? $this->body()->buildings[$index] : [];
     }
 
-    protected function calculateGameMd5($version, $battleMode, $mapName, $mapSize, $mapId, $mapSalt)
+    protected function calculateGameMd5($version, $battleMode, $mapId)
     {
         $player_salt = [];
         foreach ($this->players() as $p) {
-            $player_salt[] = $p->index . $p->name . $p->civId;
+             $player_salt[] = $p->index . $p->name . $p->civId . $p->position()[0] . $p->position()[1];
         }
         sort($player_salt);
         $player_salt = implode($player_salt);
         $rec_salt =
             $version .
             $battleMode .
-            $mapName .
-            $mapSize .
             $mapId .
-            $player_salt .
-            $mapSalt;
+            $player_salt;
         return md5($rec_salt);
     }
 

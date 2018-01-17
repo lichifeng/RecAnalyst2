@@ -50,4 +50,8 @@ class Tile
         $this->terrain = $terrain;
         $this->elevation = $elevation;
     }
+
+    public function toArray() {
+        return [$this->x, $this->y, $this->terrain, $this->elevation];
+    }
 }
