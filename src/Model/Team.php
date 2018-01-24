@@ -21,8 +21,6 @@ class Team
      */
     private $players = [];
 
-    public $isWinner = false;
-
     /**
      * Adds a player to the team.
      *

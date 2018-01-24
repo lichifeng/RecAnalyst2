@@ -482,34 +482,84 @@ class RecordedGame
         return md5($rec_salt);
     }
 
-    protected function teamAndWinner()
-    {
-        $teams = [];
+    protected function teamAndWinner() {
+        $t = []; // percent of losers of every team
+        $loser_cnt = [];
+        $team_cnt = [];
+        $max_ratio = 0;
+        $max_index = [];
+        $loser_found = false;
+
         foreach ($this->teams() as $team) {
-            $teams[$team->index()]["is_winner"] = false;
-            $resigned = 0;
-            $player_sum = count($team->players());
-            foreach ($team->players() as $player) {
-                $teams[$team->index()]["players"][] = [$player->index, $player->number];
-                if ($player->resignTime > 0) {
-                    $resigned += 1;
+            if($team->index() === 0) {
+                foreach ($team->players() as $p) {
+                    $new_index = $p->index + 5;
+                    $t[$new_index]['players'][] = [$p->index, $p->number];
+                    $team_cnt[$new_index] = 1;
+                    if($p->resignTime > 0) {
+                        $t[$new_index]['is_winner'] = isset($t[$new_index]['is_winner']) ? $t[$new_index]['is_winner'] : false;
+                        $loser_cnt[$new_index] = $t[$new_index]['is_winner'] ? 0 : 1;
+                    } else {
+                        $t[$new_index]['is_winner'] = true;
+                        $loser_cnt[$new_index] = 0;
+                    }
+                }
+                continue;
+            }
+
+            $t[$team->index()]['is_winner'] = true;
+            $is_loser = [];
+            foreach ($team->players() as $p) {
+                $t[$team->index()]['players'][] = [$p->index, $p->number];
+                if ($p->resignTime > 0) {
+                    $is_loser[$p->index] = (isset($is_loser[$p->index]) && $is_loser[$p->index] === false) ? false : true;
+                } else {
+                    $is_loser[$p->index] = false;
                 }
             }
-            $teams[$team->index()]["confidence_index_of_loser"] = $resigned / $player_sum;
-        }
-        $most_possible_winner_index = 0;
-        $minimal_loser_val = 1;
-        foreach ($teams as $index => $team) {
-            if ($team['confidence_index_of_loser'] <= $minimal_loser_val) {
-                $most_possible_winner_index = $index;
-                $minimal_loser_val = $team['confidence_index_of_loser'];
-            }
-        }
-        $teams[$most_possible_winner_index]['is_winner'] = true;
-        if (array_key_exists($most_possible_winner_index, $this->teams())) {
-            $this->teams()[$most_possible_winner_index]->isWinner = true;
+            $loser_cnt[$team->index()] = array_reduce($is_loser, function($losers, $p){
+                return $losers += $p ? 1 : 0;
+            }, 0);
+            $team_cnt[$team->index()] = count($is_loser);
         }
 
-        return $teams;
+        foreach ($loser_cnt as $i => $c) {
+            $r = $c / $team_cnt[$i];
+            if($r === 1) {
+                $t[$i]['is_winner'] = false;
+                $loser_found = true;
+            }
+
+            if($r < $max_ratio) continue;
+
+            if($r > $max_ratio) {
+                $max_ratio = $r;
+                $max_index = [$i];
+            }
+
+            if($r === $max_ratio) {
+                $max_index[] = $i;
+            }
+        }
+
+        if(!$loser_found) {
+            try {
+                if($this->pov()->resignTime === 0) {
+                    $index = $this->pov()->team()->index() === 0 ? $this->pov()->index + 5 : $this->pov()->team()->index();
+                    $loser_cnt[$index]++;
+                    $r = $loser_cnt[$index] / $team_cnt[$index];
+
+                    if($r >= $max_ratio) {
+                        $max_index = [$i];
+                    }
+                }
+            } catch (RecAnalystException $e) {
+                // Pass
+            }
+            foreach ($max_index as $i) {
+                $t[$i]['is_winner'] = false;
+            }
+        }
+        return $t;
     }
 }
