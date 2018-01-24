@@ -550,7 +550,7 @@ class RecordedGame
                     $r = $loser_cnt[$index] / $team_cnt[$index];
 
                     if($r >= $max_ratio) {
-                        $max_index = [$i];
+                        $max_index = [$index];
                     }
                 }
             } catch (RecAnalystException $e) {
