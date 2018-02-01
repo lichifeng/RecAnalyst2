@@ -486,7 +486,7 @@ class RecordedGame
         $t = []; // percent of losers of every team
         $loser_cnt = [];
         $team_cnt = [];
-        $max_ratio = 0;
+        $max_ratio = 0.5;
         $max_index = [];
         $loser_found = false;
 
@@ -549,7 +549,7 @@ class RecordedGame
                     $loser_cnt[$index]++;
                     $r = $loser_cnt[$index] / $team_cnt[$index];
 
-                    if($r >= $max_ratio) {
+                    if($r > $max_ratio) {
                         $max_index = [$index];
                     }
                 }
