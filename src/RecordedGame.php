@@ -546,7 +546,7 @@ class RecordedGame
             try {
                 if($this->pov()->resignTime === 0) {
                     $index = $this->pov()->team()->index() === 0 ? $this->pov()->index + 5 : $this->pov()->team()->index();
-                    $loser_cnt[$index]++;
+                    $loser_cnt[$index] += $loser_cnt[$index] > 0 ? 1 : 0;
                     $r = $loser_cnt[$index] / $team_cnt[$index];
 
                     if($r > $max_ratio) {
