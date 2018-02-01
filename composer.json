@@ -7,7 +7,7 @@
   "autoload": {
     "psr-4": { "RecAnalyst\\": "src/" }
   },
-  "license": "GPL-3.0",
+  "license": "GPL-3.0-or-later",
 
   "authors": [
     {
