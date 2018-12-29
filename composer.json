@@ -2,6 +2,7 @@
   "name": "lichifeng/recanalyst2",
   "description": "Analyzes Age of Empires 2 recorded game files.",
   "keywords": ["age-of-empires","game-records", "mgx-analyzer", "mgz-analyzer"],
+  "version": "4.2.3",
   "type": "library",
   "homepage": "https://github.com/lichifeng/RecAnalyst2",
   "autoload": {
@@ -20,7 +21,7 @@
       "homepage": "http://idlebeaver.ninja"
     },
     {
-      "name": "Patrick Li",
+      "name": "Patrick Lee",
       "email": "mail@lichifeng.com",
       "homepage": "https://lichifeng.com"
     }

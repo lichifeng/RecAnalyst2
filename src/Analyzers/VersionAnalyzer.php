@@ -169,6 +169,7 @@ class VersionAnalyzer extends Analyzer
             case 'VER 9.D':
                 return Version::VERSION_USERPATCH14;
             case 'VER 9.E':
+            case 'VER 9.F':
                 return Version::VERSION_USERPATCH15;
             default:
                 return $version;

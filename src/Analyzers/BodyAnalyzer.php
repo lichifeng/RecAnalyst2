@@ -25,31 +25,17 @@ class BodyAnalyzer extends Analyzer
      */
     const OP_SYNC = 0x02;
     /**
-     * Operation ID of "meta" operations like the start of the game or chat
-     * messages.
+     * Operation ID of view update packets for the recorded game's owner.
      *
      * @var int
      */
-    const OP_META = 0x03;
+    const OP_VIEWLOCK = 0x03;
     /**
-     * Same as OP_META, but not quite?
+     * Operation ID for chat messages, and the game start message in AoC and newer.
      *
      * @var int
      */
-    const OP_META2 = 0x04;
-
-    /**
-     * Game start identifier.
-     *
-     * @var int
-     */
-    const META_GAME_START = 0x01F4;
-    /**
-     * Chat message identifier.
-     *
-     * @var int
-     */
-    const META_CHAT = -1;
+    const OP_CHAT = 0x04;
 
     /**
      * Resignation command ID.
@@ -163,6 +149,35 @@ class BodyAnalyzer extends Analyzer
     private $postGameData = null;
 
     /**
+     * How often checksums are included in a sync message. Each nth message will contain checksums.
+     *
+     * @var int
+     */
+    private $syncChecksumInterval = 500;
+
+    /**
+     * Current sync message index. When this reaches $syncChecksumInterval, the message contains checksums,
+     * and the counter is reset.
+     *
+     * @var int
+     */
+    private $syncIndex = 0;
+
+    /**
+     * Whether the actions contain sequence numbers. Enabled when the LC_SEQUENCE flag was used to start the game.
+     *
+     * @var bool
+     */
+    private $containsSequenceNumbers = false;
+
+    /**
+     * How many chapters the game contains.
+     *
+     * @var int
+     */
+    private $numberOfChapters = 0;
+
+    /**
      * Run the analysis.
      *
      * @return object
@@ -185,40 +200,42 @@ class BodyAnalyzer extends Analyzer
         $this->playersByNumber = $playersByNumber;
 
         $size = strlen($this->body);
+
         $this->position = 0;
+        if ($version->isMgl) {
+            $this->processGameStart();
+        }
+
         while ($this->position < $size - 3) {
-            $operationType = 0;
-            if ($version->isMgl && $this->position === 0) {
-                $operationType = self::OP_META2;
-            } else {
-                $operationType = $this->readBody('l', 4);
-            }
+            $operationType = $this->readBody('l', 4);
 
-            if ($operationType === self::OP_META || $operationType === self::OP_META2) {
-                if ($operationType === self::OP_META) {
-                    $version->version = $version->version === 5 ? 7 : $version->version;
-                } elseif ($operationType === self::OP_META2) {
-                    $version->version = $version->version === 5 ? 8 : $version->version;
-                }
-
-                $command = $this->readBody('l', 4);
-                if ($command === self::META_GAME_START) {
-                    $this->processGameStart();
-                } elseif ($command === self::META_CHAT) {
+            if ($operationType === self::OP_CHAT) {
+                $version->version = $version->version === 5 ? 8 : $version->version;
+                // AoC and up store the game start message with the same ID
+                // as a CHAT message, but chat messages are prefixed with 0xFFFF_FFFF
+                $syncChecksumInterval = $this->readBody('l', 4);
+                if ($syncChecksumInterval === -1) {
                     $this->processChatMessage();
+                } else {
+                    $this->position -= 4;
+                    $this->processGameStart();
                 }
             } else if ($operationType === self::OP_SYNC) {
+                $this->syncIndex++;
                 // There are a lot of sync packets, so we get a significant
                 // speedup just from doing this inline (and not in a separate
                 // method), and by using `unpack` and manual position increments
                 // instead of `readBody`.
                 $data = unpack('l2', substr($this->body, $this->position, 8));
                 $this->currentTime += $data[1]; // $this->readBody('l', 4);
-                $unknown = $data[2]; // $this->readBody('L', 4);
-                if ($unknown === 0) {
+                if ($this->syncIndex === $this->syncChecksumInterval) {
+                    // no need to parse checksums
                     $this->position += 28;
                 }
-                $this->position += 20;
+            } else if ($operationType === self::OP_VIEWLOCK) {
+                $version->version = $version->version === 5 ? 7 : $version->version;
+                // just skip for now
+                $this->position += 12;
             } else if ($operationType === self::OP_COMMAND) {
                 $length = $this->readBody('l', 4);
                 $next = $this->position + $length;
@@ -377,16 +394,23 @@ class BodyAnalyzer extends Analyzer
     }
 
     /**
-     * Process the game start data. Not much here right now.
+     * Process the game start data.
      */
     private function processGameStart()
     {
+        $this->syncChecksumInterval = $this->readBody('l', 4);
         if ($this->version->isMgl) {
+            // not sure what difference is vs mgx and up
             $this->position += 28;
             $ver = ord($this->body[$this->position]);
             $this->position += 4;
         } else {
-            $this->position += 20;
+            // These are also stored in the header.
+            $isMultiplayer = $this->readBody('l', 4);
+            $pov = $this->readBody('l', 4);
+            $revealMap = $this->readBody('l', 4);
+            $this->containsSequenceNumbers = $this->readBody('l', 4);
+            $this->numberOfChapters = $this->readBody('l', 4);
         }
     }
 
