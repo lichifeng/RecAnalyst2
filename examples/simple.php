@@ -9,7 +9,8 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use RecAnalyst\RecordedGame;
 
-$filename = $argv[1] ?? __DIR__ . '/../test/recs/forgotten/HD-FE.mgx2';
+$filename = $argv[1] ?? __DIR__ . '/../test/recs/hawkaoc-teamtest/rec.20181119-214848.mgz';
+//$filename = $argv[1] ?? __DIR__ . '/../test/recs/WK-PLAYEROBJECT-BUG-20181205-213220.mgz';
 
 // Read a recorded game from a file path.
 $rec = new RecordedGame($filename);
@@ -19,12 +20,17 @@ echo 'Version: ' . $version->versionString . ' (' . $version->subVersion . ')' .
 
 // Display players and their civilizations.
 echo 'Players: ' . "\n";
-foreach ($rec->players() as $player) {
-    printf(" %s %s (%s)\n",
+foreach ($rec->output()->players as $player) {
+    printf(" %s %s (%s) %s %s %s\n",
         $player->owner ? '>' : '*',
         $player->name,
-        $player->civName());
+        $player->civName(),
+        'Index: ' . $player->index,
+        'Team: ' . $player->team,
+        'No.: ' . $player->number);
 }
+
+var_dump($rec->output()->teams);
 
 // Render a map image. Map images are instances of the \Intervention\Image
 // library, so you can easily manipulate them.

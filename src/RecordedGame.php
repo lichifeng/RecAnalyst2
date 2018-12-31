@@ -439,7 +439,7 @@ class RecordedGame
         $output->startingAge = $this->pov()->startingAge();
         $output->duration = $this->body()->duration;
         $output->researchTable = $this->researchTable();
-        $output->teams = $this->teamAndWinner();
+
         $output->mapImage = $this->mapImage()->resize(360, 180);
         $output->version = $this->version()->name();
         $output->tributes = $this->body()->tributes;
@@ -457,6 +457,34 @@ class RecordedGame
         $output->ingameChat = $this->body()->chatMessages;
         $output->pregameChat = $this->header()->pregameChat;
         $output->players = $this->players();
+
+        if ($output->postGameData !== null) {
+            $output->teams = [];
+
+            foreach ($output->players as $player) {
+                if ($output->failedUP15 = $this->header()->playerInfo->failedUP15) {
+                    $player->civId = $output->postGameData[$player->number-1]->civId;
+                    $player->colorId = $output->postGameData[$player->number-1]->colorId - 1;
+                    $player->feudalTime = $output->postGameData[$player->number-1]->techStats->feudalTime * 1000;
+                    $player->castleTime = $output->postGameData[$player->number-1]->techStats->castleTime * 1000;
+                    $player->imperialTime = $output->postGameData[$player->number-1]->techStats->imperialTime * 1000;
+                    $player->resignTime = 0;
+                    $output->duration = 0;
+                }
+
+                if ($output->postGameData[$player->number-1]->team == 1) {
+                    $player->team = $output->postGameData[$player->number-1]->team = $player->index + 5;
+                } else {
+                    $player->team = $output->postGameData[$player->number-1]->team;
+                }
+
+                $winner = $output->postGameData[$player->number-1]->victory;
+                $output->teams[$player->team]['is_winner'] = $winner ? true : false;
+                $output->teams[$player->team]['players'][] = [$player->index, $player->number];
+            }
+        } else {
+            $output->teams = $this->teamAndWinner();
+        }
 
         return $output;
     }

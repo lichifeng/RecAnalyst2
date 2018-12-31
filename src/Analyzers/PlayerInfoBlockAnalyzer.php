@@ -39,6 +39,11 @@ class PlayerInfoBlockAnalyzer extends Analyzer
     private $playerObjects = [];
 
     /**
+     * Whether error occured here
+     */
+    private $failedUP15 = false;
+
+    /**
      * @param object  $analysis  Current state of the HeaderAnalyzer.
      */
     public function __construct($analysis)
@@ -180,11 +185,18 @@ class PlayerInfoBlockAnalyzer extends Analyzer
                 $this->position = $existObjectPos + strlen($existObjectSeparator);
             }
 
-            $objects = $this->read(PlayerObjectsListAnalyzer::class, [
-                'players' => array_merge([
-                    0 => $gaia,
-                ], $playersByIndex),
-            ]);
+            try {
+                $objects = $this->read(PlayerObjectsListAnalyzer::class, [
+                    'players' => array_merge([
+                        0 => $gaia,
+                    ], $playersByIndex),
+                ]);
+            } catch (\Exception $e) {
+                $objects = null;
+                $this->failedUP15 = true;
+                continue;
+            }
+
 
             foreach ($objects->gaiaObjects as &$object) {
                 $this->gaiaObjects[] = $object;
@@ -199,6 +211,7 @@ class PlayerInfoBlockAnalyzer extends Analyzer
             'players' => array_slice($players, 1),
             'gaiaObjects' => $this->gaiaObjects,
             'playerObjects' => $this->playerObjects,
+            'failedUP15' => $this->failedUP15,
         ];
     }
 
