@@ -470,6 +470,7 @@ class RecordedGame
                     $player->imperialTime = $output->postGameData[$player->number-1]->techStats->imperialTime * 1000;
                     $player->resignTime = 0;
                     $output->duration = 0;
+                    $output->gameSpeed = 0;
                 }
 
                 if ($output->postGameData[$player->number-1]->team == 1) {
