@@ -459,7 +459,7 @@ class RecordedGame
         $output->pregameChat = $this->header()->pregameChat;
         $output->players = $this->players();
 
-        if ($output->postGameData !== null) {
+        if ($output->postGameData !== null and $output->isUserPatch) {
             $output->teams = [];
 
             foreach ($output->players as $player) {
