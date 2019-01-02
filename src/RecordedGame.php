@@ -442,6 +442,7 @@ class RecordedGame
 
         $output->mapImage = $this->mapImage()->resize(360, 180);
         $output->version = $this->version()->name();
+        $output->isUserPatch = $this->version()->isUserPatch;
         $output->tributes = $this->body()->tributes;
         $output->units = $this->body()->units;
         $output->postGameData = isset($this->body()->postGameData->players) ? $this->body()->postGameData->players : null;
