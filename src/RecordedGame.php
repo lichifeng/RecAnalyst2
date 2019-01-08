@@ -459,8 +459,12 @@ class RecordedGame
         $output->pregameChat = $this->header()->pregameChat;
         $output->players = $this->players();
 
+        $retro_winner_data = $this->teamAndWinner();
+
         if ($output->postGameData !== null and $output->isUserPatch) {
             $output->teams = [];
+
+            $winner_found = false;
 
             foreach ($output->players as $player) {
                 if ($output->failedUP15 = $this->header()->playerInfo->failedUP15) {
@@ -481,11 +485,15 @@ class RecordedGame
                 }
 
                 $winner = $output->postGameData[$player->number-1]->victory;
-                $output->teams[$player->team]['is_winner'] = $winner ? true : false;
+                $output->teams[$player->team]['is_winner'] = $winner ? ($winner_found = true) : false;
                 $output->teams[$player->team]['players'][] = [$player->index, $player->number];
             }
+
+            if (!$winner_found and !$output->failedUP15) {
+                $output->teams = $retro_winner_data;
+            }
         } else {
-            $output->teams = $this->teamAndWinner();
+            $output->teams = $retro_winner_data;
         }
 
         return $output;
